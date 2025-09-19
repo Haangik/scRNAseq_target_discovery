@@ -122,3 +122,31 @@ def compute_positivity(adata, gene1, gene2, gene_symbol_col="GeneSymbol"):
         f"P(double+|{gene2}+)": cond_prob2
     }])
     return stats
+
+def summarize_positivity(
+    adata_tumor, adata_normal, genes, target1="CEACAM5"
+):
+    results = []
+    for target_gene in tqdm(genes, desc="Processing genes"):
+        try:
+            # Tumor
+            df_tumor = compute_positivity(adata_tumor, target1, target_gene)
+            # Normal
+            df_normal = compute_positivity(adata_normal, target1, target_gene)
+            row = {
+                "Gene": target_gene,
+                "Tumor target positive (%)": df_tumor[f"{target_gene}_pos_rate"].iloc[0] * 100,
+                "Normal target positive (%)": df_normal[f"{target_gene}_pos_rate"].iloc[0] * 100,
+                "Tumor double positive (%)": df_tumor[f"{target1}_{target_gene}_double_pos_rate"].iloc[0] * 100,
+                "Normal double positive (%)": df_normal[f"{target1}_{target_gene}_double_pos_rate"].iloc[0] * 100,
+                "Tumor Double+/Target+ (%)": df_tumor[f"P(double+|{target_gene}+)"].iloc[0] * 100,
+                "Normal Double+/Target+ (%)": df_normal[f"P(double+|{target_gene}+)"].iloc[0] * 100,
+                "Tumor Double+/CEACAM5+ (%)": df_tumor[f"P(double+|{target1}+)"].iloc[0] * 100,
+                "Normal Double+/CEACAM5+ (%)": df_normal[f"P(double+|{target1}+)"].iloc[0] * 100,
+            }
+            results.append(row)
+        except Exception as e:
+            print(f"[Warning] Skipped {target_gene} due to error: {e}")
+        gc.collect()
+    df_result = pd.DataFrame(results)
+    return df_result
