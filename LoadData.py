@@ -8,7 +8,7 @@ import time
 import matplotlib.pyplot as plt
 import scipy.sparse as sparse
 from mygene import MyGeneInfo
-from functions_python import compute_expression_margins, cell_specific_gene_expression, compute_positivity
+from functions_python import compute_expression_margins, cell_specific_gene_expression, compute_positivity, summarize_positivity
 
 #### Lung cancer post-EGFR-TKI
 # Overall structure of .h5ad file
